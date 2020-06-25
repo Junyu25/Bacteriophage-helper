@@ -55,7 +55,9 @@ def AnnotatePhage(Dir):
         contigsOutDir = ""
         contigsOutPath = ""
         #SpadesFilePath = ""
+        prefixList = []
         contigsFileList = []
+        contigsOutDirList = []
         for file in files:
             if file == "scaffolds.fasta":
                 #SpadesFilePath = os.path.join(subdir, "scaffolds.fasta")
@@ -63,12 +65,14 @@ def AnnotatePhage(Dir):
                     if len(contigs) > dlen:
                         print(contigs.id)
                         print(contigs)
-                        contigsOutDir = os.path.join(OutDir, contigs.name)
+                        contigsOutDir = os.path.join(subdir, contigs.name) #OutDir is the sub dir of run
                         contigsOutPath = os.path.join(contigsOutDir, contigs.name+".fasta")
+                        contigsOutDirList.append(contigsOutDir)
                         contigsFileList.append(contigsOutPath)
+                        prefixList.append(contigs.name)
                         os.makedirs(contigsOutDir, 0o777, True)
                         SeqIO.write(contigs, contigsOutPath, "fasta")
-        RunProkkaParallel(contigsFileList, outFileList, prefixList)
+        RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
         
 
 '''      
@@ -82,10 +86,11 @@ def PreContigs(contigs, OutDir):
         os.makedirs(contigsOutDir, 0o777, True)
         SeqIO.write(contigs, contigsOutPath, "fasta")
 '''        
-        
+'''        
 def CopyResult(InList, OutList):
     #copy assemble result to parent dir
     copyfile(os.path.join(SpadesOutDir, "scaffolds.fasta"), outputFilePath)
+'''
 
 #Run Spades in parallel
 def RunSpadesParallel(R1List, R2List, outFileList):
@@ -146,3 +151,4 @@ inputDir = str(args.fileDir)
 ouputDir = os.path.abspath(args.OpDir)
 
 RunSpadesDirectory(inputDir, ouputDir)
+AnnotatePhage(ouputDir)
