@@ -6,6 +6,9 @@ from shutil import copyfile
 from itertools import repeat
 from multiprocessing import Pool, freeze_support
 
+#definate length of a phage genome
+dlen = 10000
+
 #Run Spades on a directory
 def RunSpadesDirectory(inputDir, ouputDir):
     for subdir, dirs, files in os.walk(inputDir):
