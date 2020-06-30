@@ -49,29 +49,30 @@ def RunSpadesDirectory(inputDir, ouputDir):
     RunBandageParallel(outFileList, BandageOutList)
     
     RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
-    
+#Run on outDir's Spades assemble out put    
 def AnnotatePhage(Dir):
-    for subdir, dirs, files in os.walk(Dir):
-        contigsOutDir = ""
-        contigsOutPath = ""
-        #SpadesFilePath = ""
-        prefixList = []
-        contigsFileList = []
-        contigsOutDirList = []
-        for file in files:
-            if file == "scaffolds.fasta":
-                #SpadesFilePath = os.path.join(subdir, "scaffolds.fasta")
-                for contigs in SeqIO.parse(contigs, "fasta"):
-                    if len(contigs) > dlen:
-                        print(contigs.id)
-                        print(contigs)
-                        contigsOutDir = os.path.join(subdir, contigs.name) #OutDir is the sub dir of run
-                        contigsOutPath = os.path.join(contigsOutDir, contigs.name+".fasta")
-                        contigsOutDirList.append(contigsOutDir)
-                        contigsFileList.append(contigsOutPath)
-                        prefixList.append(contigs.name)
-                        os.makedirs(contigsOutDir, 0o777, True)
-                        SeqIO.write(contigs, contigsOutPath, "fasta")
+    for run in os.listdir(Dir):
+        for assemble in os.listdir(os.path.join(Dir, run)):
+            contigsOutDir = ""
+            contigsOutPath = ""
+            #SpadesFilePath = ""
+            prefixList = []
+            contigsFileList = []
+            contigsOutDirList = []
+            SpadesFilePath = os.path.join(Dir, run, assemble, "scaffolds.fasta")
+            print(SpadesFilePath)
+            if os.path.exists(SpadesFilePath):
+                for contigs in SeqIO.parse(SpadesFilePath, "fasta"):
+                        if len(contigs) > dlen:
+                            contigsOutDir = os.path.join(Dir, run ,contigs.name) #OutDir is the sub dir of run
+                            contigsOutPath = os.path.join(contigsOutDir, contigs.name+".fasta")
+                            contigsOutDirList.append(contigsOutDir)
+                            contigsFileList.append(contigsOutPath)
+                            prefixList.append(contigs.name)
+                            #print(contigsOutDir)
+                            #print(contigsOutPath)
+                            os.makedirs(contigsOutDir, 0o777, True)
+                            SeqIO.write(contigs, contigsOutPath, "fasta")
         RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
         
 
@@ -107,6 +108,7 @@ def RunSpades(R1, R2, OutDir):
     os.makedirs(OutDir, 0o777, True)
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
     cmd = "spades.py --meta -1 " + R1 + " -2 " + R2 + " -o " + OutDir
+   
     subprocess.call(cmd, shell=True)
 
 
@@ -136,7 +138,8 @@ def RunProkkaParallel(fileList, outFileList, prefixList):
     pool.terminate()
 
 def RunProkka(fasta, outDir, prefix):
-    cmd = "prokka --kingdom Viruses --hmms VOGs --addgenes --prefix " + prefix + "--outdir " + outDir + fasta
+    cmd = "prokka --kingdom Viruses --genus viral --hmms /home/junyuchen/Lab/Phage-SOP/Database/VOGDB/VOGDB_m.hmm --addgenes --prefix " + prefix + " --outdir " + outDir + " --force " + fasta
+    print(cmd)
     subprocess.call(cmd, shell=True)
 
 
@@ -150,5 +153,5 @@ args = parser.parse_args()
 inputDir = str(args.fileDir)
 ouputDir = os.path.abspath(args.OpDir)
 
-RunSpadesDirectory(inputDir, ouputDir)
+#RunSpadesDirectory(inputDir, ouputDir)
 AnnotatePhage(ouputDir)
