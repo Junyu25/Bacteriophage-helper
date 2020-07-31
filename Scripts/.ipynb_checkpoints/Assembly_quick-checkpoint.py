@@ -153,5 +153,5 @@ args = parser.parse_args()
 inputDir = str(args.fileDir)
 ouputDir = os.path.abspath(args.OpDir)
 
-#RunSpadesDirectory(inputDir, ouputDir)
+RunSpadesDirectory(inputDir, ouputDir)
 AnnotatePhage(ouputDir)
