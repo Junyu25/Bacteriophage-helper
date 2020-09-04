@@ -31,7 +31,7 @@ def RunSpadesDirectory(inputDir, ouputDir):
                 #print(R1)
                 #print(R2)
                 R2List.append(R2)
-                sampleStr = os.path.splitext(file)[0]
+                sampleStr = os.path.splitext(file)[0].replace("_1.clean.fq", "")
                 outputFilePath = os.path.join(ouputDir, sampleStr)
                 outFileList.append(outputFilePath)
                 
