@@ -24,14 +24,14 @@ def RunSpadesDirectory(inputDir, ouputDir):
         SpadesOutList = []
         BandageOutList = []
         for file in files:
-            if file.endswith("_1.clean.fq"):
+            if file.endswith("_1.clean.fq.gz"):
                 R1 = os.path.join(subdir, file)
-                R2 = os.path.join(subdir, file[:-10]+"2.clean.fq")
+                R2 = os.path.join(subdir, file[:-13]+"2.clean.fq.gz")
                 R1List.append(R1)
                 #print(R1)
                 #print(R2)
                 R2List.append(R2)
-            sampleStr = os.path.splitext(file)[0][:-8]
+            sampleStr = os.path.splitext(file)[0]
             outputFilePath = os.path.join(ouputDir, sampleStr)
             outFileList.append(outputFilePath)
             
