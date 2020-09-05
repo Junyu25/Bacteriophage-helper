@@ -41,10 +41,8 @@ def RunSpadesDirectory(inputDir, ouputDir):
     os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
 
     RunSpadesParallel(R1List, R2List, SpadesOutList, jobs, threads)
-
     RunBandageParallel(outFileList, BandageOutList)
-    
-    RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
+    #RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
 
 #Run on outDir's Spades assemble out put    
 def AnnotatePhage(Dir):
@@ -68,7 +66,14 @@ def AnnotatePhage(Dir):
                             os.makedirs(contigsOutDir, 0o777, True)
                             SeqIO.write(contigs, contigsOutPath, "fasta")
         RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
-        
+
+def RunDiamondDir(Dir):
+    for subdir, dirs, files in os.walk(Dir):
+        filePath = ""
+        for file in files:
+            if file.endswith("fasta") and "NODE" in file:
+                filePath = os.path.join(subdir, file)
+                RunDiamond()
 
 
 
