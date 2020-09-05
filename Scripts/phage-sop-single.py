@@ -39,7 +39,7 @@ def RunSpadesDirectory(inputDir, ouputDir):
                 BandageOutList.append(os.path.join(ouputDir, sampleStr, "preview.png"))
                 #make out dir for every run
                 os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
-                RunSpades(R1, R2, outputFilePath)
+                RunSpades(R1, R2, SpadesOutDir)
                 RunBandage(outputFilePath, os.path.join(ouputDir, sampleStr, "preview.png"))
     
 
