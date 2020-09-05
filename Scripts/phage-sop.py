@@ -174,3 +174,4 @@ r2_end = args.sp2
 
 RunSpadesDirectory(inputDir, ouputDir)
 AnnotatePhage(ouputDir)
+RunDiamondDir(ouputDir)
