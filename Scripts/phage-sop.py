@@ -68,12 +68,17 @@ def AnnotatePhage(Dir):
         RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
 
 def RunDiamondDir(Dir):
+    filePathList = []
+    outFileList = []
     for subdir, dirs, files in os.walk(Dir):
         filePath = ""
         for file in files:
-            if file.endswith("fasta") and "NODE" in file:
+            if file.endswith("faa") and "NODE" in file:
                 filePath = os.path.join(subdir, file)
-                RunDiamond()
+                outFile = os.path.join(subdir, file, ".tsv")
+                filePathList.append(filePath)
+                outFileList.append(outFile)
+    RunDiamondParallel(filePathList, outFileList)
 
 
 
@@ -105,12 +110,13 @@ def RunBandageParallel(fileList, outFileList):
     pool.join()
     pool.terminate()
 #Bandage image CD1382_FDSW202399938-1r/assembly_graph.fastg CD1382.jpg
-#Bandage Assembling
+#Bandage Preview
 def RunBandage(InFile, OutFile):
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
     cmd = "Bandage image " + InFile + "/assembly_graph.fastg "+ OutFile
     subprocess.call(cmd, shell=True)
 
+#Run Prokka in parallel
 def RunProkkaParallel(fileList, outFileList, prefixList):
     #numOfprocess = len(R1List)
     #pool = Pool(processes=numOfprocess)
@@ -125,7 +131,17 @@ def RunProkka(fasta, outDir, prefix):
     print(cmd)
     subprocess.call(cmd, shell=True)
 
-def RunDiamond(fasta, outFile)
+#Run Diamond in parallel
+def RunDiamondParallel(fileList, outFileList):
+    #numOfprocess = len(R1List)
+    #pool = Pool(processes=numOfprocess)
+    pool = Pool(processes=2)
+    pool.starmap(RunDiamond, zip(fileList, outFileList))
+    pool.close()
+    pool.join()
+    pool.terminate()
+
+def RunDiamond(fasta, outFile):
     cmd = "diamond blastp --db /home/malab/databases_of_malab/nr/nr --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 10"
     subprocess.call(cmd, shell=True)
 
