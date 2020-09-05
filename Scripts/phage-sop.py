@@ -6,32 +6,28 @@ from shutil import copyfile
 from itertools import repeat
 from multiprocessing import Pool, freeze_support
 
-#definate length of a phage genome
-dlen = 10000
 
 #Run Spades on a directory
 def RunSpadesDirectory(inputDir, ouputDir):
+    R1List = []
+    R2List = []
+    outFileList = []
+    SpadesFileList = []
+    SpadesOutList = []
+    BandageOutList = []
     for subdir, dirs, files in os.walk(inputDir):
         R1 = ""
         R2 = ""
         outputFilePath = ""
         SpadesFilePath = ""
         SpadesOutDir = ""
-        R1List = []
-        R2List = []
-        outFileList = []
-        SpadesFileList = []
-        SpadesOutList = []
-        BandageOutList = []
         for file in files:
-            if file.endswith("_1.clean.fq.gz"):
+            if file.endswith(r1_end):
                 R1 = os.path.join(subdir, file)
-                R2 = os.path.join(subdir, file[:-13]+"2.clean.fq.gz")
+                R2 = os.path.join(subdir, file[:-len(r1_end)]+r2_end)
                 R1List.append(R1)
-                #print(R1)
-                #print(R2)
                 R2List.append(R2)
-                sampleStr = os.path.splitext(file)[0].replace("_1.clean.fq", "")
+                sampleStr = file.replace(r1_end, "")
                 outputFilePath = os.path.join(ouputDir, sampleStr)
                 outFileList.append(outputFilePath)
                 
@@ -44,21 +40,19 @@ def RunSpadesDirectory(inputDir, ouputDir):
     #make out dir for every run
     os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
 
-    RunSpadesParallel(R1List, R2List, SpadesOutList)
-
+    RunSpadesParallel(R1List, R2List, SpadesOutList, jobs, threads)
     RunBandageParallel(outFileList, BandageOutList)
-    
-    RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
+    #RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
+
 #Run on outDir's Spades assemble out put    
 def AnnotatePhage(Dir):
+    prefixList = []
+    contigsFileList = []
+    contigsOutDirList = []
     for run in os.listdir(Dir):
         for assemble in os.listdir(os.path.join(Dir, run)):
             contigsOutDir = ""
             contigsOutPath = ""
-            #SpadesFilePath = ""
-            prefixList = []
-            contigsFileList = []
-            contigsOutDirList = []
             SpadesFilePath = os.path.join(Dir, run, assemble, "scaffolds.fasta")
             print(SpadesFilePath)
             if os.path.exists(SpadesFilePath):
@@ -69,46 +63,40 @@ def AnnotatePhage(Dir):
                             contigsOutDirList.append(contigsOutDir)
                             contigsFileList.append(contigsOutPath)
                             prefixList.append(contigs.name)
-                            #print(contigsOutDir)
-                            #print(contigsOutPath)
                             os.makedirs(contigsOutDir, 0o777, True)
                             SeqIO.write(contigs, contigsOutPath, "fasta")
         RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
-        
 
-'''      
-def PreContigs(contigs, OutDir):
-    for contigs in SeqIO.parse(contigs, "fasta"):
-    if len(contigs) > dlen:
-        print(contigs.id)
-        print(contigs)
-        contigsOutDir = os.path.join(OutDir, contigs.name)
-        contigsOutPath = os.path.join(contigsOutDir, contigs.name+".fasta")
-        os.makedirs(contigsOutDir, 0o777, True)
-        SeqIO.write(contigs, contigsOutPath, "fasta")
-'''        
-'''        
-def CopyResult(InList, OutList):
-    #copy assemble result to parent dir
-    copyfile(os.path.join(SpadesOutDir, "scaffolds.fasta"), outputFilePath)
-'''
+def RunDiamondDir(Dir):
+    filePathList = []
+    outFileList = []
+    for subdir, dirs, files in os.walk(Dir):
+        filePath = ""
+        for file in files:
+            if file.endswith("faa") and "NODE" in file:
+                filePath = os.path.join(subdir, file)
+                outFile = os.path.join(subdir, file, ".tsv")
+                filePathList.append(filePath)
+                outFileList.append(outFile)
+    RunDiamondParallel(filePathList, outFileList)
+
+
 
 #Run Spades in parallel
-def RunSpadesParallel(R1List, R2List, outFileList):
+def RunSpadesParallel(R1List, R2List, outFileList, jobs, threads):
     #numOfprocess = len(R1List)
     #pool = Pool(processes=numOfprocess)
-    pool = Pool(processes=20)
-    pool.starmap(RunSpades, zip(R1List, R2List, outFileList))
+    pool = Pool(processes=jobs)
+    pool.starmap(RunSpades, zip(R1List, R2List, outFileList, repeat(threads)))
     pool.close()
     pool.join()
     pool.terminate()
 
 #SPAdes Assembling
-def RunSpades(R1, R2, OutDir):
+def RunSpades(R1, R2, OutDir, threads):
     os.makedirs(OutDir, 0o777, True)
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
-    cmd = "spades.py --meta -1 " + R1 + " -2 " + R2 + " -o " + OutDir
-   
+    cmd = "spades.py --meta -1 " + R1 + " -2 " + R2 + " -o " + OutDir + " -t " + threads
     subprocess.call(cmd, shell=True)
 
 
@@ -116,22 +104,23 @@ def RunSpades(R1, R2, OutDir):
 def RunBandageParallel(fileList, outFileList):
     #numOfprocess = len(R1List)
     #pool = Pool(processes=numOfprocess)
-    pool = Pool(processes=20)
+    pool = Pool(processes=4)
     pool.starmap(RunBandage, zip(fileList, outFileList))
     pool.close()
     pool.join()
     pool.terminate()
 #Bandage image CD1382_FDSW202399938-1r/assembly_graph.fastg CD1382.jpg
-#Bandage Assembling
+#Bandage Preview
 def RunBandage(InFile, OutFile):
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
     cmd = "Bandage image " + InFile + "/assembly_graph.fastg "+ OutFile
     subprocess.call(cmd, shell=True)
 
+#Run Prokka in parallel
 def RunProkkaParallel(fileList, outFileList, prefixList):
     #numOfprocess = len(R1List)
     #pool = Pool(processes=numOfprocess)
-    pool = Pool(processes=20)
+    pool = Pool(processes=4)
     pool.starmap(RunProkka, zip(fileList, outFileList, prefixList))
     pool.close()
     pool.join()
@@ -142,16 +131,46 @@ def RunProkka(fasta, outDir, prefix):
     print(cmd)
     subprocess.call(cmd, shell=True)
 
+#Run Diamond in parallel
+def RunDiamondParallel(fileList, outFileList):
+    #numOfprocess = len(R1List)
+    #pool = Pool(processes=numOfprocess)
+    pool = Pool(processes=2)
+    pool.starmap(RunDiamond, zip(fileList, outFileList))
+    pool.close()
+    pool.join()
+    pool.terminate()
+
+def RunDiamond(fasta, outFile):
+    cmd = "diamond blastp --db /home/malab/databases_of_malab/nr/nr --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 10"
+    subprocess.call(cmd, shell=True)
+
 
 parser = argparse.ArgumentParser(description='Assembly reads')
 parser.add_argument('-i', '--input', dest='fileDir', type=str, required=True,
                     help="the path of the reads")
 parser.add_argument('-o', '--output', dest='OpDir', type=str, required=True,
                     help="the output path of reads")
+parser.add_argument('-j', '--jobs', dest='jobs', type=str,  required=False, default='4',
+                    help="the number of jobs run in parallel")
+parser.add_argument('-t', '--threads', dest='threads', type=str, required=False, default='6',
+                    help="the number of threads run for a job")
+parser.add_argument('-l', '--length', dest='length', type=str, required=False, default='10000',
+                    help="the length to filter contigs")
+parser.add_argument('-F', '--sepF', dest='sp1', type=str, required=False, default='_1.clean.fq.gz',
+                    help="It is the surfix to recognize the forward info, default='_1.clean.fq.gz'.")
+parser.add_argument('-R', '--sepR', dest='sp2', type=str, required=False, default='_2.clean.fq.gz',
+                    help="It is the surfix to recognize the reverse info, default='_2.clean.fq.gz'.")
 args = parser.parse_args()
 
 inputDir = str(args.fileDir)
 ouputDir = os.path.abspath(args.OpDir)
+jobs = int(args.jobs)
+threads = int(args.threads)
+#definate length of a phage genome
+dlen = int(args.length)
+r1_end = args.sp1
+r2_end = args.sp2
 
 RunSpadesDirectory(inputDir, ouputDir)
 AnnotatePhage(ouputDir)

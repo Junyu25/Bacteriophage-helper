@@ -53,3 +53,22 @@ inputDir = str(args.file)
 ouputDir = os.path.abspath(args.OpDir)
 
 RunSpadesDirectory(inputDir, ouputDir)
+
+
+
+'''      
+def PreContigs(contigs, OutDir):
+    for contigs in SeqIO.parse(contigs, "fasta"):
+    if len(contigs) > dlen:
+        print(contigs.id)
+        print(contigs)
+        contigsOutDir = os.path.join(OutDir, contigs.name)
+        contigsOutPath = os.path.join(contigsOutDir, contigs.name+".fasta")
+        os.makedirs(contigsOutDir, 0o777, True)
+        SeqIO.write(contigs, contigsOutPath, "fasta")
+'''        
+'''        
+def CopyResult(InList, OutList):
+    #copy assemble result to parent dir
+    copyfile(os.path.join(SpadesOutDir, "scaffolds.fasta"), outputFilePath)
+'''
