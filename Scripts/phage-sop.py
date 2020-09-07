@@ -146,7 +146,7 @@ def RunDiamond(fasta, outFile):
     subprocess.call(cmd, shell=True)
 
 
-parser = argparse.ArgumentParser(description='Assembly reads')
+parser = argparse.ArgumentParser(description='Phage Assembly & Annotation')
 parser.add_argument('-i', '--input', dest='fileDir', type=str, required=True,
                     help="the path of the reads")
 parser.add_argument('-o', '--output', dest='OpDir', type=str, required=True,
