@@ -37,11 +37,14 @@ def RunSpadesDirectory(inputDir, ouputDir):
                 SpadesOutList.append(SpadesOutDir)
                 SpadesFileList.append(SpadesFilePath)
                 BandageOutList.append(os.path.join(ouputDir, sampleStr, "preview.png"))
-    #make out dir for every run
-    os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
+                #make out dir for every run
+                os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
+                RunSpades(R1, R2, SpadesOutDir)
+                RunBandage(outputFilePath, os.path.join(ouputDir, sampleStr, "preview.png"))
+    
 
-    RunSpadesParallel(R1List, R2List, SpadesOutList, jobs, threads)
-    RunBandageParallel(outFileList, BandageOutList)
+    #RunSpadesParallel(R1List, R2List, SpadesOutList, jobs, threads)
+    #RunBandageParallel(outFileList, BandageOutList)
     #RunProkkaParallel(SpadesFilePath, outFileList, SpadesFilePath) #prefix?
 
 #Run on outDir's Spades assemble out put    
@@ -65,7 +68,8 @@ def AnnotatePhage(Dir):
                             prefixList.append(contigs.name)
                             os.makedirs(contigsOutDir, 0o777, True)
                             SeqIO.write(contigs, contigsOutPath, "fasta")
-        RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
+                            RunProkka(contigsOutPath, contigsOutDir, contigs.name)
+        #RunProkkaParallel(contigsFileList, contigsOutDirList, prefixList)
 
 def RunDiamondDir(Dir):
     filePathList = []
@@ -73,12 +77,13 @@ def RunDiamondDir(Dir):
     for subdir, dirs, files in os.walk(Dir):
         filePath = ""
         for file in files:
-            if file.endswith("faa") and "NODE" in file:
+            if file.endswith(".faa") and "NODE" in file:
                 filePath = os.path.join(subdir, file)
                 outFile = os.path.join(subdir, file + ".tsv")
                 filePathList.append(filePath)
                 outFileList.append(outFile)
-    RunDiamondParallel(filePathList, outFileList)
+                RunDiamond(filePath, outFile)
+    #RunDiamondParallel(filePathList, outFileList)
 
 
 
@@ -93,10 +98,10 @@ def RunSpadesParallel(R1List, R2List, outFileList, jobs, threads):
     pool.terminate()
 
 #SPAdes Assembling
-def RunSpades(R1, R2, OutDir, threads):
+def RunSpades(R1, R2, OutDir):
     os.makedirs(OutDir, 0o777, True)
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
-    cmd = "spades.py --meta -1 " + R1 + " -2 " + R2 + " -o " + OutDir + " -t " + str(threads)
+    cmd = "spades.py --meta -1 " + R1 + " -2 " + R2 + " -o " + OutDir
     subprocess.call(cmd, shell=True)
 
 
@@ -142,7 +147,7 @@ def RunDiamondParallel(fileList, outFileList):
     pool.terminate()
 
 def RunDiamond(fasta, outFile):
-    cmd = "diamond blastp --db /home/malab/databases_of_malab/nr/nr --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 10"
+    cmd = "diamond blastp --db /home/malab/databases_of_malab/nr/nr --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 16"
     subprocess.call(cmd, shell=True)
 
 
@@ -172,6 +177,6 @@ dlen = int(args.length)
 r1_end = args.sp1
 r2_end = args.sp2
 
-RunSpadesDirectory(inputDir, ouputDir)
-AnnotatePhage(ouputDir)
+#RunSpadesDirectory(inputDir, ouputDir)
+#AnnotatePhage(ouputDir)
 RunDiamondDir(ouputDir)
