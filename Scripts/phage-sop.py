@@ -30,15 +30,16 @@ def RunSpadesDirectory(inputDir, ouputDir):
                 sampleStr = file.replace(r1_end, "")
                 outputFilePath = os.path.join(ouputDir, sampleStr)
                 outFileList.append(outputFilePath)
-                
+                #SPAdes file out
                 SpadesOutDir = os.path.join(ouputDir, sampleStr, "assemble")
                 SpadesFilePath = os.path.join(SpadesOutDir, "scaffolds.fasta")
-                
+                #SPAdes list
                 SpadesOutList.append(SpadesOutDir)
                 SpadesFileList.append(SpadesFilePath)
+                #Bandage
                 BandageOutList.append(os.path.join(ouputDir, sampleStr, "preview.png"))
-    #make out dir for every run
-    os.makedirs(os.path.join(ouputDir, sampleStr), 0o777, True)
+                #make out dir for every run
+                os.makedirs(outputFilePath, 0o777, True)
 
     RunSpadesParallel(R1List, R2List, SpadesOutList, jobs, threads)
     RunBandageParallel(outFileList, BandageOutList)
