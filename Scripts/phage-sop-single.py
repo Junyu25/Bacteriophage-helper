@@ -177,6 +177,6 @@ dlen = int(args.length)
 r1_end = args.sp1
 r2_end = args.sp2
 
-RunSpadesDirectory(inputDir, ouputDir)
+#RunSpadesDirectory(inputDir, ouputDir)
 AnnotatePhage(ouputDir)
 RunDiamondDir(ouputDir)
