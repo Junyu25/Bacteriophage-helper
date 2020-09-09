@@ -3,9 +3,10 @@ Bacteriophage standard operating procedure
 
 ## Usage
 
+First Activate the Environment:
 `source /home/junyuchen/Biosoft/anaconda3/bin/activate /home/junyuchen/Biosoft/anaconda3/envs/phage`
 
-
+Second Use the pipeline:
 ```
 usage: phage-sop.py [-h] -i FILEDIR -o OPDIR [-j JOBS] [-t THREADS] [-l LENGTH] [-F SP1] [-R SP2]
 
@@ -25,7 +26,7 @@ optional arguments:
   -F SP1, --sepF SP1    It is the surfix to recognize the forward info, default='_1.clean.fq.gz'.
   -R SP2, --sepR SP2    It is the surfix to recognize the reverse info, default='_2.clean.fq.gz'.
 ```
-
+d
 
 eg.
 ```shell
