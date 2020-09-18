@@ -26,7 +26,7 @@ optional arguments:
   -F SP1, --sepF SP1    It is the surfix to recognize the forward info, default='_1.clean.fq.gz'.
   -R SP2, --sepR SP2    It is the surfix to recognize the reverse info, default='_2.clean.fq.gz'.
 ```
-d
+
 
 eg.
 ```shell
