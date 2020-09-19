@@ -114,7 +114,7 @@ def RunBandageParallel(fileList, outFileList):
 #Bandage Preview
 def RunBandage(InFile, OutFile):
     #cmd = "spades.py --isolate -1 " + R1 + " -2 " + R2 + " -o " + OutDir
-    cmd = "Bandage image " + InFile + "/assembly_graph.fastg "+ OutFile
+    cmd = "Bandage image " + InFile + "/assemble/assembly_graph.fastg "+ OutFile
     subprocess.call(cmd, shell=True)
 
 #Run Prokka in parallel
