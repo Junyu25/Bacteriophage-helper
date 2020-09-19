@@ -19,6 +19,7 @@ def RunBandageDir(inputDir):
             SpadesFileList.append(SpadesFilePath)
             #Bandage
             BandageOutList.append(os.path.join(inputDir, Dir, Dir+"_preview.png"))
+    RunBandageParallel(SpadesFileList, BandageOutList)
 
 #Run Bandage in parallel
 def RunBandageParallel(fileList, outFileList):
