@@ -143,7 +143,7 @@ def RunDiamondParallel(fileList, outFileList):
     pool.terminate()
 
 def RunDiamond(fasta, outFile):
-    cmd = "diamond blastp --db /home/malab/databases_of_malab/nr/nr --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 10"
+    cmd = "diamond blastp --db " + nr + " --query " + fasta + " --out " + outFile + " --evalue 1e-05 --outfmt 6 --max-target-seqs 1 --threads 10"
     subprocess.call(cmd, shell=True)
 
 
@@ -152,6 +152,8 @@ parser.add_argument('-i', '--input', dest='fileDir', type=str, required=True,
                     help="the path of the reads")
 parser.add_argument('-o', '--output', dest='OpDir', type=str, required=True,
                     help="the output path of reads")
+parser.add_argument('-d', '--database', dest='Database', type=str, required=False, default='/home/malab/databases_of_malab/nr/nr',
+                    help="the nr database path")
 parser.add_argument('-j', '--jobs', dest='jobs', type=str,  required=False, default='4',
                     help="the number of jobs run in parallel")
 parser.add_argument('-t', '--threads', dest='threads', type=str, required=False, default='6',
@@ -164,8 +166,9 @@ parser.add_argument('-R', '--sepR', dest='sp2', type=str, required=False, defaul
                     help="It is the surfix to recognize the reverse info, default='_2.clean.fq.gz'.")
 args = parser.parse_args()
 
-inputDir = str(args.fileDir)
+inputDir = os.path.abspath(args.fileDir)
 ouputDir = os.path.abspath(args.OpDir)
+nr = os.path.abspath(args.Database)
 jobs = int(args.jobs)
 threads = int(args.threads)
 #definate length of a phage genome
