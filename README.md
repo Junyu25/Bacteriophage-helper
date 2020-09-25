@@ -1,5 +1,6 @@
 # Bacteriophage-helper
 Bacteriophage standard operating procedure
+![](img/Phage-SOP.png)
 
 ## Usage
 
